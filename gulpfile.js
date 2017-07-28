@@ -6,7 +6,8 @@ var gulp = require('gulp'),
     sass = require('gulp-sass'),
     less = require('gulp-less'),
     cleanCSS = require('gulp-clean-css'),
-    livereload = require('gulp-livereload');
+    sassLint = require('gulp-sass-lint'),
+    lessHint = require('gulp-lesshint');
 
 var paths = {
     src: "./src",
@@ -30,7 +31,7 @@ gulp.task('browserSync', function() {
 });
 
 //监听所有打包之后的文件变动，自动刷新页面
-gulp.task('sass', function () {
+gulp.task('sass',['sassLint'], function () {
   return gulp.src(paths.srcSass+'/**.scss')
     .pipe(sass().on('error', sass.logError))
     .pipe(cleanCSS({compatibility: 'ie8'}))
@@ -38,7 +39,7 @@ gulp.task('sass', function () {
 });
 
 //监听所有打包之后的文件变动，自动刷新页面
-gulp.task('less', function () {
+gulp.task('less',['lessLint'], function () {
     return gulp.src(paths.srcLess+'/**.less')
         .pipe(less())
         .pipe(cleanCSS({compatibility: 'ie8'}))
@@ -55,6 +56,22 @@ gulp.task('clean', function() {
     return del(
         [paths.dist]
     );
+});
+
+gulp.task('lessLint', function () {
+    return gulp.src('./src/*.less')
+        .pipe(lessHint({
+            // Options 
+        }))
+        // .pipe(lessHint.reporter('reporter-name')) // Leave empty to use the default, "stylish" 
+        .pipe(lessHint.failOnError()); // Use this to fail the task on lint errors 
+});
+
+gulp.task('sassLint', function () {
+  return gulp.src('sass/**/*.s+(a|c)ss')
+    .pipe(sassLint())
+    .pipe(sassLint.format())
+    .pipe(sassLint.failOnError())
 });
 
 gulp.task('sassBuild', ['sass']);
